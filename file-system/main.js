@@ -1,28 +1,12 @@
-const {truncateSync, appendFileSync, createReadStream, statSync} = require('node:fs')
+const {open} = require("fs/promises");
 
-const target = __dirname + '/sample.txt'
-
-truncateSync(target)
-
-const count = 10
-for (let i = 0;i < count;i++) {
-  const options = {encoding: 'utf-8'}
-  appendFileSync(target, i % 2 === 0 ? '双' : '单', options)
+async function openFile(name, data) {
+  try {
+    const fileName = __dirname + name;
+    const file = await open(fileName, 'w');
+    await file.write(data);
+  } catch (error) {
+    console.log(`Got an error trying to open the file: ${error.message}`);
+  }
 }
-
-const options = {
-  encoding: 'utf-8',
-  start: 27,
-  end: 29
-}
-const readStream = createReadStream(target, options)
-readStream.on('data', function (res) {
-  console.log(`readStream - data: `, res)
-})
-readStream.on('end', function () {
-  console.log(`read stream completely`)
-  const stats = statSync(target)
-  const sizeInByte = stats.size
-  console.log(`content size: ${sizeInByte}, per: ${sizeInByte/count}`)
-})
-readStream.on('error', function () {})
+openFile("/sample.txt", "This is content that was written by open method.");
