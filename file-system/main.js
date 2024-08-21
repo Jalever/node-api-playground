@@ -1,12 +1,11 @@
-const {open} = require("fs/promises");
-
-async function openFile(name, data) {
+const { readFile } = require("fs/promises");
+async function readTheFile(name = "") {
   try {
-    const fileName = __dirname + name;
-    const file = await open(fileName, 'w');
-    await file.write(data);
+    const filePath = __dirname + name;
+    const data = await readFile(filePath);
+    console.log("the content that was read from readFile: ", data.toString());
   } catch (error) {
-    console.log(`Got an error trying to open the file: ${error.message}`);
+    console.error(`got an error trying to read the file: ${error.message}`);
   }
 }
-openFile("/sample.txt", "This is content that was written by open method.");
+readTheFile("/sample.txt");
