@@ -1,11 +1,15 @@
-const { readFile } = require("fs/promises");
-async function readTheFile(name = "") {
+const { rename } = require("fs/promises");
+
+async function renameFile(from = "", to = "") {
   try {
-    const filePath = __dirname + name;
-    const data = await readFile(filePath);
-    console.log("the content that was read from readFile: ", data.toString());
+    const filename = function (name = "") {
+      return __dirname + name;
+    };
+    await rename(filename(from), filename(to));
+    console.log(`renamed ${from} to ${to}`);
   } catch (error) {
-    console.error(`got an error trying to read the file: ${error.message}`);
+    console.error(`got an error trying to rename the file: ${error.message}`);
   }
 }
-readTheFile("/sample.txt");
+
+renameFile("/sample.txt", "/sample-2.txt");
