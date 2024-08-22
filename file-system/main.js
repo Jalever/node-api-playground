@@ -1,15 +1,17 @@
 const { rename } = require("fs/promises");
+const { join } = require("path");
 
-async function renameFile(from = "", to = "") {
+const log = console.log.bind(console);
+
+async function moveFile(from = "", to = "") {
   try {
-    const filename = function (name = "") {
-      return __dirname + name;
-    };
-    await rename(filename(from), filename(to));
-    console.log(`renamed ${from} to ${to}`);
+    await rename(from, to);
+    console.log(`moved ${from} to ${to}`);
   } catch (error) {
-    console.error(`got an error trying to rename the file: ${error.message}`);
+    console.error(`got an error trying to move the file: ${error.message}`);
   }
 }
 
-renameFile("/sample.txt", "/sample-2.txt");
+const source = join(__dirname, "sample-2.txt");
+const destination = join(__dirname, "sample.txt");
+moveFile(source, destination);
