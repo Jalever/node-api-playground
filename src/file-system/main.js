@@ -1,14 +1,26 @@
-const { unlink } = require('fs/promises')
+const { watch } = require('fs/promises')
 const { join } = require('path')
 
-async function deleteFile(traget = '') {
-  const filename = join(__dirname, traget)
+const ac = new AbortController()
+const { signal } = ac
+setTimeout(function () {
+  ac.abort()
+}, 10 * 1000)
+
+async function watchFile(target = '') {
+  const filepath = join(__dirname, target)
   try {
-    await unlink(filename)
-    console.log(`deleted ${filename}`)
+    const watcher = watch(filepath, { signal })
+    for await (const event of watcher) {
+      console.log(`${target} file changed, event: `, event)
+    }
   } catch (error) {
-    console.error(`got an error trying to delete the file: ${error.message}`)
+    if (error.name === 'AbortError') {
+      console.log(`time out.`)
+      return
+    }
+    throw error
   }
 }
 
-deleteFile(`/sample.txt`)
+watchFile('/sample.txt')
