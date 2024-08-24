@@ -1,8 +1,9 @@
 const http = require('http')
+const url = require('url')
+
 const server = http.createServer(function (req, res) {
-  console.log(`Request Headers: >> `, req.headers)
-  console.log(`Request Method: >> `, req.method)
-  console.log(`Request URL: >> `, req.url)
+  const urlData = url.parse(req.url, true)
+  console.log(`url data: >> `, urlData)
   res.end('Hello World!')
 })
 server.listen(3000, function () {
