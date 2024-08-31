@@ -1,20 +1,40 @@
 const http = require('http')
+const https = require('https')
+const fs = require('fs')
+const path = require('path')
 
-const server = http.createServer(function (req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Method', 'GET, POST, PUT, DELETE')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+const getPath = function (p = '') {
+  return path.join(__dirname, p)
+}
 
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200)
-    res.end()
-    return
-  }
+const privateKey = fs.readFileSync(
+  getPath('/ssl-certificate/private-key.pem'),
+  'utf8',
+)
+const certificate = fs.readFileSync(
+  getPath('/ssl-certificate/certificate.pem'),
+  'utf8',
+)
 
-  res.end('Hello World!')
+const httpServer = http.createServer(function (req, res) {
+  res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` })
+  res.end()
 })
 
-const PORT = 3000
-server.listen(PORT, function () {
-  console.log(`Server is listening on port ${PORT}`)
+httpServer.listen(80, function () {
+  console.log(`HTTP server listening on port 80`)
+})
+
+const credentials = {
+  key: privateKey,
+  cert: certificate,
+}
+
+const httpsServer = https.createServer(credentials, function (req, res) {
+  res.writeHead(200, { 'Content-Type': 'text/plain' })
+  res.end('Secure Hello World!')
+})
+
+httpsServer.listen(443, function () {
+  console.log('HTTPS server listening on port 443')
 })
