@@ -1,5 +1,4 @@
-const http = require('http')
-const https = require('https')
+const http2 = require('http2')
 const fs = require('fs')
 const path = require('path')
 
@@ -16,25 +15,20 @@ const certificate = fs.readFileSync(
   'utf8',
 )
 
-const httpServer = http.createServer(function (req, res) {
-  res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` })
-  res.end()
-})
-
-httpServer.listen(80, function () {
-  console.log(`HTTP server listening on port 80`)
-})
-
 const credentials = {
   key: privateKey,
   cert: certificate,
 }
 
-const httpsServer = https.createServer(credentials, function (req, res) {
-  res.writeHead(200, { 'Content-Type': 'text/plain' })
-  res.end('Secure Hello World!')
+const http2Server = http2.createServer(credentials)
+http2Server.on('stream', function (stream, requestHeaders) {
+  stream.respond({
+    status: 200,
+    'content-type': 'text/plain',
+  })
+  stream.write('Hello World!')
+  stream.end()
 })
-
-httpsServer.listen(443, function () {
-  console.log('HTTPS server listening on port 443')
+http2Server.listen(3000, function () {
+  console.log(`Started server on port 3000`)
 })
