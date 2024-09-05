@@ -1,14 +1,8 @@
-const { Transform } = require('stream')
+const fs = require('fs')
+const zlib = require('zlib')
+const path = require('path')
 
-const upperCaseTransform = new Transform({
-  transform(chunk, encoding, callback) {
-    this.push(chunk.toString().toUpperCase())
-    callback()
-  },
-})
-upperCaseTransform.on('data', function (data) {
-  return process.stdout.write(data)
-})
-upperCaseTransform.write('hello, ')
-upperCaseTransform.write('world!')
-upperCaseTransform.end()
+const filePath = path.join(__dirname, '/article.xmind')
+fs.createReadStream(filePath)
+  .pipe(zlib.createGzip())
+  .pipe(fs.createWriteStream(filePath + '.gz'))
