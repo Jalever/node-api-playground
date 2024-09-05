@@ -1,21 +1,20 @@
+const { pipeline } = require('stream')
 const fs = require('fs')
 const zlib = require('zlib')
 const path = require('path')
-const { Transform } = require('stream')
 
-const fileName = path.join(__dirname, '/article.xmind')
+const fileName = path.join(__dirname, '/article')
 
-const reportProgress = new Transform({
-  transform(chunk, encoding, callback) {
-    process.stdout.write('.')
-    callback(null, chunk)
+pipeline(
+  fs.createReadStream(fileName + '.xmind'),
+  zlib.createGzip(),
+  fs.createWriteStream(fileName + '.tar.gz'),
+
+  function (err) {
+    if (err) {
+      console.log('failed ', err)
+    } else {
+      console.log('success')
+    }
   },
-})
-
-fs.createReadStream(fileName)
-  .pipe(zlib.createGzip())
-  .pipe(reportProgress)
-  .pipe(fs.createWriteStream(fileName + '.zz'))
-  .on('finish', function () {
-    console.log('Done')
-  })
+)
