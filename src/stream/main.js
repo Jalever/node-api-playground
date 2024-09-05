@@ -1,21 +1,14 @@
-const Duplex = require('stream').Duplex
-const duplex = Duplex()
+const { Transform } = require('stream')
 
-duplex._read = function () {
-  this._readNum = this._readNum || 0
-  if (this._readNum > 1) {
-    this.push(null)
-  } else {
-    this.push('' + this._readNum++)
-  }
-}
-duplex._write = function (buf, enc, next) {
-  process.stdout.write('_write ' + buf.toString() + '\n')
-  next()
-}
-duplex.on('data', function (data) {
-  console.log('ondata: ', data.toString())
+const upperCaseTransform = new Transform({
+  transform(chunk, encoding, callback) {
+    this.push(chunk.toString().toUpperCase())
+    callback()
+  },
 })
-duplex.write('a')
-duplex.write('b')
-duplex.end()
+upperCaseTransform.on('data', function (data) {
+  return process.stdout.write(data)
+})
+upperCaseTransform.write('hello, ')
+upperCaseTransform.write('world!')
+upperCaseTransform.end()
