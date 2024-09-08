@@ -1,15 +1,19 @@
-const { Transform } = require('stream')
+const { pipeline } = require('stream')
+const fs = require('fs')
+const zlib = require('zlib')
+const path = require('path')
 
-const upperCaseTransform = new Transform({
-  transform(chunk, encoding, callback) {
-    this.push(chunk.toString().toUpperCase())
-    callback()
+const fileName = path.join(__dirname, '/article')
+
+pipeline(
+  fs.createReadStream(fileName + '.xmind'),
+  zlib.createGzip(),
+  fs.createWriteStream(fileName + '.tar.gz'),
+  function (err) {
+    if (err) {
+      console.log('failure', err)
+    } else {
+      console.log('success')
+    }
   },
-})
-
-upperCaseTransform.on('data', function (data) {
-  return process.stdout.write(data)
-})
-upperCaseTransform.write('Hello, ')
-upperCaseTransform.write('world')
-upperCaseTransform.end()
+)
