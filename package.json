@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "fs": "node ./src/file-system/main.js"
+    "fs": "node ./src/file-system/main.js",
+    "stream": "node ./src/stream/main.js",
+    "stream:generate": "node ./src/stream/generate.js",
+    "stream:clear": "node ./src/stream/truncate.js"
   },
   "keywords": [],
   "author": "",
