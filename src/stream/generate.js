@@ -9,7 +9,7 @@ const count = 2_000 * 10
 for (let i = count; i > 0; i--) {
   try {
     const content = faker.lorem.paragraphs()
-    const newContent = `[${i}]${content}`
+    const newContent = `${content}`
     appendFileSync(filePath, newContent)
   } catch (error) {
     throw new Error(error)
