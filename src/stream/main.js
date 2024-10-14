@@ -1,44 +1,40 @@
-const http = require('node:http')
-const fs = require('node:fs')
-const path = require('path')
-const { Transform } = require('node:stream')
+const { statSync, createReadStream, createWriteStream } = require('node:fs')
+const { pipeline } = require('node:stream/promises')
+const zlib = require('node:zlib')
+const path = require('node:path')
 
-const PORT = 8000
+const bookPath = getFilePath(
+  '../../private-assets/linux-cpp-first-line-development-practice.pdf',
+)
+const bookCompressedPath = getFilePath(
+  '../../private-assets/linux-cpp-first-line-development-practice.pdf.tar.gz',
+)
 
-const getFilePath = (fileName = '') => path.join(__dirname, fileName)
-
-function upperCaseTransform() {
-  return new Transform({
-    transform(chunk, encoding, next) {
-      this.push(chunk.toString().toUpperCase())
-      next()
-    },
-  })
+function getFilePath(fileName = '') {
+  return path.join(__dirname, fileName)
 }
 
-const server = http.createServer(function (req, res) {
-  const stream = fs.createReadStream(getFilePath('sample.txt'))
-  stream.pipe(upperCaseTransform()).pipe(res)
-  stream.on('end', function () {
-    res.end()
-  })
-})
-server.listen(PORT, function () {
-  console.log(`Server is listening at the port: ${PORT}`)
-})
+async function compress() {
+  await pipeline(
+    createReadStream(bookPath),
+    zlib.createGzip(),
+    createWriteStream(bookCompressedPath),
+  )
+  console.log(`Pipeline Succeeded.`)
+  getSize()
+}
+compress().catch(console.error)
 
-// const { pipeline } = require('node:stream/promises')
-// const fs = require('node:fs')
-// const zlib = require('node:zlib')
-// const path = require('path')
-// const getSize = require('./utils/getSize')
-
-// const getFilePath = (fileName = '') => path.join(__dirname, fileName)
-
-// const rr = fs.createReadStream(getFilePath('sample.txt'))
-// rr.on('readable', () => {
-//   console.log(`readable: ${rr.read()}`)
-// })
-// rr.on('done', () => {
-//   console.log('end')
-// })
+function getSize() {
+  const sizeInKb = 1024
+  const sizeInMb = sizeInKb * 1024
+  const { size } = statSync(bookPath)
+  console.log(`size(kb): ${size / sizeInKb}, size(mb): ${size / sizeInMb}`)
+  const { size: sizeAfterCompressed } = statSync(bookCompressedPath)
+  console.log(` -> compressed:`)
+  console.log(
+    `size(kb): ${sizeAfterCompressed / sizeInKb}, size(mb): ${
+      sizeAfterCompressed / sizeInMb
+    }`,
+  )
+}
